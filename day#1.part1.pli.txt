@@ -1,0 +1,41 @@
+ day#1£1: proc options(main) reorder;                                   00010000
+                                                                        00020000
+   dcl aocin file record input environment(recsize(80));                00030022
+   dcl end_file bit init('0'B);                                         00040022
+   dcl aoc_cnt fixed bin(15) init(1);                                   00050027
+   dcl depth_cnt fixed bin(15) init(1);                                 00060027
+   dcl previous_cnt fixed bin(15) init(0);                              00070041
+   dcl increased_cnt fixed bin(15) init(0);                             00080041
+   dcl depth fixed(8,4) dim(2001);                                      00090038
+   dcl 1 aocin_rec,                                                     00100023
+         5 aoc_depth pic '***9',                                        00110040
+         5 junk char(76);                                               00120022
+                                                                        00130000
+   on endfile(aocin) end_file = '1'B;                                   00140022
+                                                                        00150022
+   open file(aocin);                                                    00160022
+   read file(aocin) into(aocin_rec);                                    00170022
+   do while (¬end_file);                                                00180022
+     depth(aoc_cnt) = aoc_depth;                                        00190034
+     aoc_cnt = aoc_cnt +1;                                              00200022
+     read file(aocin) into(aocin_rec);                                  00210022
+   end;                                                                 00220022
+   close file(aocin);                                                   00230046
+                                                                        00240022
+   do until(depth_cnt >= aoc_cnt);                                      00250040
+     put skip list (depth_cnt, previous_cnt,                            00260043
+                    depth(depth_cnt), increased_cnt);                   00270043
+     if depth_cnt > 1 then do;                                          00280044
+       previous_cnt = depth_cnt -1;                                     00300044
+       if depth(depth_cnt) > depth(previous_cnt) then do;               00310044
+         increased_cnt = increased_cnt +1;                              00330048
+       end;                                                             00340044
+     end;                                                               00350041
+     depth_cnt = depth_cnt +1;                                          00360026
+   end;                                                                 00370022
+                                                                        00380046
+   put skip edit ('Larger measurements: ', increased_cnt)               00400048
+                 (a(21), f(8));                                         00401049
+                                                                        00410022
+ end day#1£1;                                                           00420022
+

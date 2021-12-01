@@ -1,0 +1,59 @@
+ day#1£2: proc options(main) reorder;                                   00010001
+                                                                        00020001
+   dcl aocin file record input environment(recsize(80));                00030001
+   dcl end_file bit init('0'B);                                         00040001
+   dcl aoc_cnt fixed bin(15) init(1);                                   00050001
+   dcl depth_cnt fixed bin(15) init(1);                                 00060001
+   dcl sum_cnt fixed bin(15) init(1);                                   00070001
+   dcl previous_cnt  fixed bin(15) init(0);                             00080001
+   dcl previous_cnt1 fixed bin(15) init(0);                             00090001
+   dcl previous_cnt2 fixed bin(15) init(0);                             00100001
+   dcl increased_cnt fixed bin(15) init(0);                             00110001
+   dcl depth fixed(8,4) dim(2001);                                      00120001
+   dcl depth_sum fixed(8,2) dim(2001);                                  00130001
+   dcl 1 aocin_rec,                                                     00140001
+         5 aoc_depth pic '***9',                                        00150001
+         5 junk char(76);                                               00160001
+                                                                        00170001
+   on endfile(aocin) end_file = '1'B;                                   00180001
+                                                                        00190001
+   open file(aocin);                                                    00200001
+   read file(aocin) into(aocin_rec);                                    00210001
+   do while (¬end_file);                                                00220001
+     depth(aoc_cnt) = aoc_depth;                                        00230001
+     aoc_cnt = aoc_cnt +1;                                              00240001
+     read file(aocin) into(aocin_rec);                                  00250001
+   end;                                                                 00260001
+   close file(aocin);                                                   00270001
+                                                                        00280001
+   do until(depth_cnt >= aoc_cnt);                                      00290001
+     if depth_cnt > 2 then do;                                          00300002
+       previous_cnt1 = depth_cnt -1;                                    00310001
+       previous_cnt2 = depth_cnt -2;                                    00320001
+       depth_sum(sum_cnt) = depth(depth_cnt) +                          00330001
+                            depth(previous_cnt1) +                      00340001
+                            depth(previous_cnt2);                       00350001
+       put skip list (sum_cnt, previous_cnt1, previous_cnt2,            00360002
+                      depth_sum(sum_cnt));                              00370002
+       sum_cnt = sum_cnt +1;                                            00380001
+     end;                                                               00390001
+     depth_cnt = depth_cnt +1;                                          00400001
+   end;                                                                 00410001
+                                                                        00420001
+   depth_cnt = 1;                                                       00430001
+   do until(depth_cnt >= sum_cnt);                                      00440001
+     put skip list (depth_cnt, previous_cnt,                            00450001
+                    depth_sum(depth_cnt), increased_cnt);               00460001
+     if depth_cnt > 1 then do;                                          00470001
+       previous_cnt = depth_cnt -1;                                     00480001
+       if depth_sum(depth_cnt) > depth_sum(previous_cnt) then do;       00490001
+         increased_cnt = increased_cnt +1;                              00500001
+       end;                                                             00510001
+     end;                                                               00520001
+     depth_cnt = depth_cnt +1;                                          00530001
+   end;                                                                 00540001
+   put skip edit ('Larger measurements: ', increased_cnt)               00550001
+                 (a(21), f(8));                                         00560001
+                                                                        00570001
+ end day#1£2;                                                           00580001
+
