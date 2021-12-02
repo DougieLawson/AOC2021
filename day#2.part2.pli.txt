@@ -1,0 +1,54 @@
+ day#2£2: proc options(main) reorder;                                   00010000
+                                                                        00020000
+   dcl aocin file record input environment(recsize(80));                00030000
+   dcl end_file bit init('1'B);                                         00040000
+   dcl aoc_cnt fixed bin(15) init(0);                                   00050000
+   dcl sub_pos fixed bin(31) init(0);                                   00060001
+   dcl depth fixed bin(31) init(0);                                     00070001
+   dcl aim   fixed bin(31) init(0);                                     00071001
+   dcl space_offset fixed bin(15);                                      00080000
+   dcl word1 char(8);                                                   00090000
+   dcl word2 pic '********';                                            00100000
+   dcl 1 aocin_rec,                                                     00110000
+         5 aoc_depth char(80);                                          00120000
+                                                                        00130000
+   on endfile(aocin) end_file = '0'B;                                   00140000
+                                                                        00150000
+   open file(aocin);                                                    00160000
+   do while (end_file);                                                 00170000
+     aoc_cnt = aoc_cnt +1;                                              00180000
+     read file(aocin) into(aocin_rec);                                  00190000
+     if end_file then do;                                               00200000
+       call parser;                                                     00210000
+     end;                                                               00220000
+   end;                                                                 00230000
+   close file(aocin);                                                   00240000
+   put skip edit ('Position: ', depth * sub_pos)                        00250000
+                 (A(10), F(10));                                        00260000
+                                                                        00270000
+ parser: proc;                                                          00280000
+   space_offset = search(aoc_depth,' ');                                00290000
+   word1 = substr(aoc_depth,1,space_offset -1);                         00300000
+   word2 = substr(aoc_depth,space_offset +1,8);                         00310000
+   select (word1);                                                      00320000
+     when ('up') do;                                                    00330000
+      aim = aim - word2;                                                00350000
+     end;                                                               00360000
+     when ('down') do;                                                  00370000
+      aim = aim + word2;                                                00390000
+     end;                                                               00400000
+     when ('forward') do;                                               00410000
+      sub_pos = sub_pos + word2;                                        00430000
+      depth = depth + (aim * word2);                                    00431000
+     end;                                                               00440000
+   end;                                                                 00450000
+   put skip edit ('Word1: ', word1, ' word2: ', word2,                  00460000
+                   depth, sub_pos, aim)                                 00461000
+                 (a(7), a(8), a(8), a(1),                               00470001
+                   f(10), f(10), f(10));                                00471001
+   return;                                                              00480000
+                                                                        00490000
+ end parser;                                                            00500000
+                                                                        00510000
+ end day#2£2;                                                           00520000
+

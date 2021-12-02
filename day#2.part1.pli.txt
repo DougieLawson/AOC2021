@@ -1,0 +1,53 @@
+ day#2£1: proc options(main) reorder;                                   00010000
+                                                                        00020000
+   dcl aocin file record input environment(recsize(80));                00030000
+   dcl end_file bit init('1'B);                                         00040009
+   dcl aoc_cnt fixed bin(15) init(0);                                   00050003
+   dcl sub_pos fixed bin(15) init(0);                                   00060012
+   dcl depth fixed bin(15) init(0);                                     00070000
+   dcl space_offset fixed bin(15);                                      00080000
+   dcl word1 char(8);                                                   00090002
+   dcl word2 pic '********';                                            00100007
+   dcl 1 aocin_rec,                                                     00110000
+         5 aoc_depth char(80);                                          00120000
+                                                                        00130000
+   on endfile(aocin) end_file = '0'B;                                   00140009
+                                                                        00150000
+   open file(aocin);                                                    00160000
+   do while (end_file);                                                 00170010
+     aoc_cnt = aoc_cnt +1;                                              00180000
+     read file(aocin) into(aocin_rec);                                  00190000
+     if end_file then do;                                               00200011
+       call parser;                                                     00210011
+     end;                                                               00220011
+   end;                                                                 00230000
+   close file(aocin);                                                   00240000
+   put skip edit ('Position: ', depth * sub_pos)                        00250012
+                 (A(10), F(10));                                        00260012
+                                                                        00270000
+ parser: proc;                                                          00280000
+   space_offset = search(aoc_depth,' ');                                00290000
+   word1 = substr(aoc_depth,1,space_offset -1);                         00300005
+   word2 = substr(aoc_depth,space_offset +1,8);                         00310000
+   select (word1);                                                      00320006
+     when ('up') do;                                                    00330006
+      put skip edit('Doing an UP')(a(11));                              00340006
+      depth = depth - word2;                                            00350008
+     end;                                                               00360006
+     when ('down') do;                                                  00370006
+      put skip edit('Doing a DOWN')(a(12));                             00380006
+      depth = depth + word2;                                            00390008
+     end;                                                               00400006
+     when ('forward') do;                                               00410006
+      put skip edit('Doing a FORWARD')(a(15));                          00420006
+      sub_pos = sub_pos + word2;                                        00430007
+     end;                                                               00440006
+   end;                                                                 00450006
+   put skip edit ('Word1: ', word1, ' word2: ', word2, depth, sub_pos)  00460007
+                 (a(7), a(8), a(8), a(1), f(5), f(5));                  00470006
+   return;                                                              00480000
+                                                                        00490000
+ end parser;                                                            00500002
+                                                                        00510002
+ end day#2£1;                                                           00520002
+
