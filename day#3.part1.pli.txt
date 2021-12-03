@@ -1,0 +1,213 @@
+ day#3£1: proc options(main) reorder;                                   00010000
+                                                                        00020000
+   dcl aocin file record input environment(recsize(80));                00030000
+   dcl end_file bit init('1'B);                                         00040000
+   dcl 1 aocin_rec,                                                     00050000
+         5 bit_01 char(1),                                              00060005
+         5 bit_02 char(1),                                              00070005
+         5 bit_03 char(1),                                              00080005
+         5 bit_04 char(1),                                              00090005
+         5 bit_05 char(1),                                              00100005
+         5 bit_06 char(1),                                              00110005
+         5 bit_07 char(1),                                              00120005
+         5 bit_08 char(1),                                              00130005
+         5 bit_09 char(1),                                              00140005
+         5 bit_10 char(1),                                              00150005
+         5 bit_11 char(1),                                              00160005
+         5 bit_12 char(1),                                              00170005
+         5 filler char(68);                                             00180007
+   dcl 1 zero_counter,                                                  00190001
+         5 bit_01 fixed bin(15) init(0),                                00200005
+         5 bit_02 fixed bin(15) init(0),                                00210005
+         5 bit_03 fixed bin(15) init(0),                                00220005
+         5 bit_04 fixed bin(15) init(0),                                00230005
+         5 bit_05 fixed bin(15) init(0),                                00240005
+         5 bit_06 fixed bin(15) init(0),                                00250005
+         5 bit_07 fixed bin(15) init(0),                                00260005
+         5 bit_08 fixed bin(15) init(0),                                00270005
+         5 bit_09 fixed bin(15) init(0),                                00280005
+         5 bit_10 fixed bin(15) init(0),                                00290005
+         5 bit_11 fixed bin(15) init(0),                                00300005
+         5 bit_12 fixed bin(15) init(0);                                00310007
+   dcl 1 one_counter,                                                   00320001
+         5 bit_01 fixed bin(15) init(0),                                00330005
+         5 bit_02 fixed bin(15) init(0),                                00340005
+         5 bit_03 fixed bin(15) init(0),                                00350005
+         5 bit_04 fixed bin(15) init(0),                                00360005
+         5 bit_05 fixed bin(15) init(0),                                00370005
+         5 bit_06 fixed bin(15) init(0),                                00380005
+         5 bit_07 fixed bin(15) init(0),                                00390005
+         5 bit_08 fixed bin(15) init(0),                                00400005
+         5 bit_09 fixed bin(15) init(0),                                00410005
+         5 bit_10 fixed bin(15) init(0),                                00420005
+         5 bit_11 fixed bin(15) init(0),                                00430005
+         5 bit_12 fixed bin(15) init(0);                                00440007
+   dcl gamma fixed bin(31) init(0);                                     00450006
+   dcl epsilon fixed bin(31) init(0);                                   00460006
+                                                                        00470000
+   on endfile(aocin) end_file = '0'B;                                   00480000
+                                                                        00490000
+   open file(aocin);                                                    00500000
+   do while (end_file);                                                 00510000
+     read file(aocin) into(aocin_rec);                                  00520000
+     if end_file then do;                                               00530000
+       call parser;                                                     00540000
+     end;                                                               00550000
+   end;                                                                 00560000
+   close file(aocin);                                                   00570000
+                                                                        00580000
+   if one_counter.bit_01 > zero_counter.bit_01 then do;                 00590005
+     gamma = gamma +2048;                                               00600007
+   end;                                                                 00610000
+   else do;                                                             00620000
+     epsilon = epsilon +2048;                                           00630007
+   end;                                                                 00640000
+   if one_counter.bit_02 > zero_counter.bit_02 then do;                 00650005
+     gamma = gamma +1024;                                               00660007
+   end;                                                                 00670003
+   else do;                                                             00680003
+     epsilon = epsilon +1024;                                           00690007
+   end;                                                                 00700003
+   if one_counter.bit_03 > zero_counter.bit_03 then do;                 00710005
+     gamma = gamma +512;                                                00720007
+   end;                                                                 00730003
+   else do;                                                             00740003
+     epsilon = epsilon +512;                                            00750007
+   end;                                                                 00760003
+   if one_counter.bit_04 > zero_counter.bit_04 then do;                 00770005
+     gamma = gamma +256;                                                00780007
+   end;                                                                 00790003
+   else do;                                                             00800003
+     epsilon = epsilon +256;                                            00810007
+   end;                                                                 00820003
+   if one_counter.bit_05 > zero_counter.bit_05 then do;                 00830005
+     gamma = gamma +128;                                                00840007
+   end;                                                                 00850003
+   else do;                                                             00860003
+     epsilon = epsilon +128;                                            00870007
+   end;                                                                 00880003
+   if one_counter.bit_06 > zero_counter.bit_06 then do;                 00890005
+     gamma = gamma + 64;                                                00900007
+   end;                                                                 00910003
+   else do;                                                             00920003
+     epsilon = epsilon +64;                                             00930007
+   end;                                                                 00940003
+   if one_counter.bit_07 > zero_counter.bit_07 then do;                 00950005
+     gamma = gamma + 32;                                                00960007
+   end;                                                                 00970003
+   else do;                                                             00980003
+     epsilon = epsilon +32;                                             00990007
+   end;                                                                 01000003
+   if one_counter.bit_08 > zero_counter.bit_08 then do;                 01010005
+     gamma = gamma +16;                                                 01020007
+   end;                                                                 01030003
+   else do;                                                             01040003
+     epsilon = epsilon +16;                                             01050007
+   end;                                                                 01060003
+   if one_counter.bit_09 > zero_counter.bit_09 then do;                 01070005
+     gamma = gamma + 8;                                                 01080007
+   end;                                                                 01090003
+   else do;                                                             01100003
+     epsilon = epsilon +8;                                              01110007
+   end;                                                                 01120003
+   if one_counter.bit_10 > zero_counter.bit_10 then do;                 01130005
+     gamma = gamma +4;                                                  01140007
+   end;                                                                 01150000
+   else do;                                                             01160000
+     epsilon = epsilon +4;                                              01170007
+   end;                                                                 01180000
+   if one_counter.bit_11 > zero_counter.bit_11 then do;                 01190005
+     gamma = gamma +2;                                                  01200007
+   end;                                                                 01210000
+   else do;                                                             01220000
+     epsilon = epsilon +2;                                              01230007
+   end;                                                                 01240000
+   if one_counter.bit_12 > zero_counter.bit_12 then do;                 01250005
+     gamma = gamma +1;                                                  01260007
+   end;                                                                 01270000
+   else do;                                                             01280000
+     epsilon = epsilon +1;                                              01290007
+   end;                                                                 01300000
+                                                                        01310007
+   put skip edit ('Gamma: ', gamma,                                     01320000
+                  ' Epsilon: ', epsilon,                                01330000
+                  ' G*E: ', gamma * epsilon)                            01340006
+                 (a(7), f(10), a(10), f(10), a(6), f(10));              01350006
+                                                                        01360000
+ parser: proc;                                                          01370000
+   if aocin_rec.bit_01 = '0' then do;                                   01380005
+      zero_counter.bit_01 = zero_counter.bit_01 +1;                     01390005
+   end;                                                                 01400000
+   else do;                                                             01410000
+      one_counter.bit_01 = one_counter.bit_01 +1;                       01420005
+   end;                                                                 01430000
+   if aocin_rec.bit_02 = '0' then do;                                   01440005
+      zero_counter.bit_02 = zero_counter.bit_02 +1;                     01450005
+   end;                                                                 01460000
+   else do;                                                             01470000
+      one_counter.bit_02 = one_counter.bit_02 +1;                       01480005
+   end;                                                                 01490000
+   if aocin_rec.bit_03 = '0' then do;                                   01500005
+      zero_counter.bit_03 = zero_counter.bit_03 +1;                     01510005
+   end;                                                                 01520000
+   else do;                                                             01530000
+      one_counter.bit_03 = one_counter.bit_03 +1;                       01540005
+   end;                                                                 01550000
+   if aocin_rec.bit_04 = '0' then do;                                   01560005
+      zero_counter.bit_04 = zero_counter.bit_04 +1;                     01570005
+   end;                                                                 01580000
+   else do;                                                             01590000
+      one_counter.bit_04 = one_counter.bit_04 +1;                       01600005
+   end;                                                                 01610000
+   if aocin_rec.bit_05 = '0' then do;                                   01620005
+      zero_counter.bit_05 = zero_counter.bit_05 +1;                     01630005
+   end;                                                                 01640000
+   else do;                                                             01650000
+      one_counter.bit_05 = one_counter.bit_05 +1;                       01660005
+   end;                                                                 01670000
+   if aocin_rec.bit_06 = '0' then do;                                   01680005
+      zero_counter.bit_06 = zero_counter.bit_06 +1;                     01690005
+   end;                                                                 01700003
+   else do;                                                             01710003
+      one_counter.bit_06 = one_counter.bit_06 +1;                       01720005
+   end;                                                                 01730003
+   if aocin_rec.bit_07 = '0' then do;                                   01740005
+      zero_counter.bit_07 = zero_counter.bit_07 +1;                     01750005
+   end;                                                                 01760003
+   else do;                                                             01770003
+      one_counter.bit_07 = one_counter.bit_07 +1;                       01780005
+   end;                                                                 01790003
+   if aocin_rec.bit_08 = '0' then do;                                   01800005
+      zero_counter.bit_08 = zero_counter.bit_08 +1;                     01810005
+   end;                                                                 01820003
+   else do;                                                             01830003
+      one_counter.bit_08 = one_counter.bit_08 +1;                       01840005
+   end;                                                                 01850003
+   if aocin_rec.bit_09 = '0' then do;                                   01860005
+      zero_counter.bit_09 = zero_counter.bit_09 +1;                     01870005
+   end;                                                                 01880003
+   else do;                                                             01890003
+      one_counter.bit_09 = one_counter.bit_09 +1;                       01900005
+   end;                                                                 01910003
+   if aocin_rec.bit_10 = '0' then do;                                   01920005
+      zero_counter.bit_10 = zero_counter.bit_10 +1;                     01930005
+   end;                                                                 01940003
+   else do;                                                             01950003
+      one_counter.bit_10 = one_counter.bit_10 +1;                       01960005
+   end;                                                                 01970003
+   if aocin_rec.bit_11 = '0' then do;                                   01980005
+      zero_counter.bit_11 = zero_counter.bit_11 +1;                     01990005
+   end;                                                                 02000003
+   else do;                                                             02010003
+      one_counter.bit_11 = one_counter.bit_11 +1;                       02020005
+   end;                                                                 02030003
+   if aocin_rec.bit_12 = '0' then do;                                   02040005
+      zero_counter.bit_12 = zero_counter.bit_12 +1;                     02050005
+   end;                                                                 02060003
+   else do;                                                             02070003
+      one_counter.bit_12 = one_counter.bit_12 +1;                       02080005
+   end;                                                                 02090003
+ end parser;                                                            02100003
+                                                                        02110000
+ end day#3£1;                                                           02120000
+
