@@ -1,0 +1,198 @@
+ day#8£2: proc options(main) reorder;                                   00010000
+                                                                        00020000
+   dcl aocin file record input environment(recsize(120));               00030000
+   dcl end_file bit init('1'b);                                         00040002
+   dcl aoc_cnt fixed bin(15) init(0);                                   00050000
+   dcl 1 aocin_rec,                                                     00060000
+         5 eight_bit_rec char(120);                                     00070000
+   dcl eight_bit_array(200,15) char(8) var;                             00080000
+   dcl digits(200,10) char(7);                                          00090003
+   dcl numbers(200) pic '****';                                         00100017
+   dcl total fixed bin(31) init(0);                                     00110019
+                                                                        00120000
+   on endfile(aocin) end_file = '0'b;                                   00130002
+                                                                        00140000
+   open file(aocin);                                                    00150000
+   do while (end_file);                                                 00160000
+     read file(aocin) into(aocin_rec);                                  00170000
+     if end_file then do;                                               00180002
+       aoc_cnt = aoc_cnt +1;                                            00190000
+       call parser(eight_bit_rec);                                      00200000
+       numbers(aoc_cnt) = eight_bit_array(aoc_cnt,12) ||                00210017
+                          eight_bit_array(aoc_cnt,13) ||                00220017
+                          eight_bit_array(aoc_cnt,14) ||                00230017
+                          eight_bit_array(aoc_cnt,15);                  00240017
+       put skip edit(eight_bit_array(aoc_cnt,12),                       00250017
+                     eight_bit_array(aoc_cnt,13),                       00260017
+                     eight_bit_array(aoc_cnt,14),                       00270017
+                     eight_bit_array(aoc_cnt,15),                       00280017
+                     numbers(aoc_cnt))                                  00290017
+                     (a(7), a(7), a(7), a(7), a(4));                    00300017
+       total = total + numbers(aoc_cnt);                                00310017
+       put skip edit('Total: ', total)(a(7), f(20));                    00311018
+     end;                                                               00320000
+   end;                                                                 00330000
+   close file(aocin);                                                   00340000
+   put skip edit('Total: ', total)(a(7), f(20));                        00350017
+                                                                        00360002
+   /*                                                                   00370002
+       -- a --                                                          00380002
+      |       |                                                         00390002
+      b       c                                                         00400002
+      |       |                                                         00410002
+       -- d --                                                          00420002
+      |       |                                                         00430002
+      e       f                                                         00440002
+      |       |                                                         00450002
+      --- g --                                                          00460002
+                                                                        00470002
+      1 = ..c..f.  (2)                                                  00480002
+      7 = a.c..f.  (3)                                                  00490002
+      4 = .bcd.f.  (4)                                                  00500002
+    4-1 = .b.d...                                                       00510002
+      8 = abcdefg  (7)                                                  00520002
+      0 = abc.efg  (6)  includes 1, 7                                   00530002
+      9 = abcd.fg  (6)  includes 1, 7, 4                                00540002
+      6 = ab.defg  (6)                                                  00550002
+      3 = abcd.f.  (5)  includes 1, 7                                   00560002
+      2 = a.cde.g  (5)                                                  00570002
+      5 = ab.d.fg  (5)  includes 4-1                                    00580002
+                                                                        00590002
+   */                                                                   00600002
+                                                                        00610000
+ parser: procedure(eight_bits);                                         00620000
+                                                                        00630000
+   dcl eight_bits char(120);                                            00640000
+   dcl four_minus_one char(7) init('       ');                          00650014
+   dcl check_1 char(1);                                                 00660015
+   dcl check_2 char(1);                                                 00670015
+   dcl check_3 char(1);                                                 00680015
+   dcl check_4 char(1);                                                 00690015
+   dcl check_5 char(1);                                                 00700015
+   dcl check_6 char(1);                                                 00710015
+   dcl check_7 char(1);                                                 00720015
+   dcl (inner,position) bin fixed(31) init(0);                          00730002
+   loop1: do inner = 1 by 1 until (inner > 15);                         00740007
+     position = index(eight_bits,' ');                                  00750000
+     if position > 0 then do;                                           00760002
+       select (position -1);                                            00770002
+        when (2) do;                                                    00780002
+         digits(aoc_cnt, 1) = left(eight_bits, position -1);            00790002
+         eight_bit_array(aoc_cnt, inner) = '1';                         00800002
+        end;                                                            00810002
+        when (3) do;                                                    00820002
+         digits(aoc_cnt, 7) = left(eight_bits, position -1);            00830002
+         eight_bit_array(aoc_cnt, inner) = '7';                         00840002
+        end;                                                            00850002
+        when (4) do;                                                    00860002
+         digits(aoc_cnt, 4) = left(eight_bits, position -1);            00870002
+         eight_bit_array(aoc_cnt, inner) = '4';                         00880002
+        end;                                                            00890002
+        when (7) do;                                                    00900002
+         digits(aoc_cnt, 8) = left(eight_bits, position -1);            00910006
+         eight_bit_array(aoc_cnt, inner) = '8';                         00920002
+        end;                                                            00930002
+        otherwise do;                                                   00940002
+         eight_bit_array(aoc_cnt, inner) =                              00950002
+         left(eight_bits, position -1);                                 00960002
+        end;                                                            00970002
+       end;                                                             00980002
+       eight_bits = substr(eight_bits, position+1);                     00990002
+     end;                                                               01000002
+     else do;                                                           01010000
+       eight_bit_array(aoc_cnt, inner) = trim(eight_bits, ' ', ' ');    01020000
+       select (length(eight_bit_array(aoc_cnt, inner)));                01030004
+        when (2) do;                                                    01040002
+         digits(aoc_cnt, 1) = eight_bit_array(aoc_cnt, inner);          01050002
+         eight_bit_array(aoc_cnt, inner) = '1';                         01060002
+        end;                                                            01070002
+        when (3) do;                                                    01080002
+         digits(aoc_cnt, 7) = eight_bit_array(aoc_cnt, inner);          01090002
+         eight_bit_array(aoc_cnt, inner) = '7';                         01100002
+        end;                                                            01110002
+        when (4) do;                                                    01120002
+         digits(aoc_cnt, 4) = eight_bit_array(aoc_cnt, inner);          01130002
+         eight_bit_array(aoc_cnt, inner) = '4';                         01140002
+        end;                                                            01150002
+        when (7) do;                                                    01160002
+         digits(aoc_cnt, 8) = eight_bit_array(aoc_cnt, inner);          01170006
+         eight_bit_array(aoc_cnt, inner) = '8';                         01180002
+        end;                                                            01190002
+       end;                                                             01200005
+       leave loop1;                                                     01210007
+     end;                                                               01220000
+   end;                                                                 01230000
+   loop2: do inner = 1 by 1 until (inner > 5);                          01240013
+     check_1 = substr(digits(aoc_cnt, 4), inner, 1);                    01250015
+     if index(digits(aoc_cnt, 1), check_1) = 0 then do;                 01260015
+       four_minus_one = check_1 || four_minus_one;                      01270015
+     end;                                                               01280007
+   end;                                                                 01290007
+                                                                        01300015
+   loop3: do inner = 1 by 1 until (inner > 15);                         01310007
+     array_len = length(eight_bit_array(aoc_cnt, inner));               01320007
+     select (array_len);                                                01330007
+      when (5) do;                                                      01340007
+       check_1 = substr(digits(aoc_cnt, 7), 1, 1);                      01350015
+       check_2 = substr(digits(aoc_cnt, 7), 2, 1);                      01360015
+       check_3 = substr(digits(aoc_cnt, 7), 3, 1);                      01370015
+       check_4 = substr(four_minus_one, 1, 1);                          01380015
+       check_5 = substr(four_minus_one, 2, 1);                          01390015
+ /*                                                                     01400015
+       3 = abcd.f.  (5)  includes 1, 7                                  01410015
+       2 = a.cde.g  (5)                                                 01420015
+       5 = ab.d.fg  (5)  includes 4-1                                   01430015
+ */                                                                     01440015
+       if index(eight_bit_array(aoc_cnt, inner), check_1) ¬= 0 &        01450015
+          index(eight_bit_array(aoc_cnt, inner), check_2) ¬= 0 &        01460015
+          index(eight_bit_array(aoc_cnt, inner), check_3) ¬= 0 then do; 01470015
+         digits(aoc_cnt, 3) = eight_bit_array(aoc_cnt, inner);          01480015
+         eight_bit_array(aoc_cnt, inner) = '3';                         01490015
+       end;                                                             01500015
+       else if index( eight_bit_array(aoc_cnt, inner), check_4) ¬= 0 &  01510015
+          index(eight_bit_array(aoc_cnt, inner), check_5) ¬= 0 then do; 01520015
+         digits(aoc_cnt, 5) = eight_bit_array(aoc_cnt, inner);          01530015
+         eight_bit_array(aoc_cnt, inner) = '5';                         01540015
+       end;                                                             01550015
+       else do;                                                         01560015
+         digits(aoc_cnt, 2) = eight_bit_array(aoc_cnt, inner);          01570015
+         eight_bit_array(aoc_cnt, inner) = '2';                         01580015
+       end;                                                             01590015
+      end;                                                              01600007
+      when (6) do;                                                      01610007
+       check_1 = substr(digits(aoc_cnt, 7), 1, 1);                      01620015
+       check_2 = substr(digits(aoc_cnt, 7), 2, 1);                      01630015
+       check_3 = substr(digits(aoc_cnt, 7), 3, 1);                      01640015
+       check_4 = substr(digits(aoc_cnt, 4), 1, 1);                      01650015
+       check_5 = substr(digits(aoc_cnt, 4), 2, 1);                      01660015
+       check_6 = substr(digits(aoc_cnt, 4), 3, 1);                      01670015
+       check_7 = substr(digits(aoc_cnt, 4), 4, 1);                      01680015
+ /*                                                                     01690015
+       0 = abc.efg  (6)  includes 1, 7                                  01700015
+       9 = abcd.fg  (6)  includes 1, 7, 4                               01710015
+       6 = ab.defg  (6)                                                 01720015
+ */                                                                     01730015
+       if index(eight_bit_array(aoc_cnt, inner), check_4) ¬= 0 &        01740015
+          index(eight_bit_array(aoc_cnt, inner), check_5) ¬= 0 &        01750015
+          index(eight_bit_array(aoc_cnt, inner), check_6) ¬= 0 &        01760015
+          index(eight_bit_array(aoc_cnt, inner), check_7) ¬= 0 then do; 01770015
+         digits(aoc_cnt, 9) = eight_bit_array(aoc_cnt, inner);          01780015
+         eight_bit_array(aoc_cnt, inner) = '9';                         01790015
+       end;                                                             01800015
+       else if index(eight_bit_array(aoc_cnt, inner), check_1) ¬= 0 &   01810015
+          index(eight_bit_array(aoc_cnt, inner), check_2) ¬= 0 &        01820015
+          index(eight_bit_array(aoc_cnt, inner), check_3) ¬= 0 then do; 01830015
+         digits(aoc_cnt, 10) = eight_bit_array(aoc_cnt, inner);         01840016
+         eight_bit_array(aoc_cnt, inner) = '0';                         01850015
+       end;                                                             01860015
+       else do;                                                         01870015
+         digits(aoc_cnt, 6) = eight_bit_array(aoc_cnt, inner);          01880015
+         eight_bit_array(aoc_cnt, inner) = '6';                         01890015
+       end;                                                             01900015
+      end;                                                              01910007
+      otherwise iterate loop3;                                          01920007
+   end;                                                                 01930007
+ end parser;                                                            01940000
+                                                                        01950000
+ end day#8£2;                                                           01960000
+
