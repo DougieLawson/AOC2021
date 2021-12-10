@@ -1,0 +1,212 @@
+ day#4£1: proc options(main) reorder;                                   00010000
+                                                                        00020000
+   dcl rec_len fixed bin(15) init(0);                                   00030010
+   dcl card_num fixed bin(15) init(0);                                  00040013
+   dcl row_num fixed bin(15);                                           00050013
+   dcl col_num fixed bin(15);                                           00060013
+   dcl call_num fixed bin(15);                                          00070022
+   dcl 1 bingo_card dim(105),                                           00080034
+         5 bingo_row dim(5),                                            00090013
+           10 bingo_col pic 'S99' dim(5) init(-2);                      00100036
+   dcl spaces_rec char(400) init((400)' ');                             00110011
+   dcl bingo_rec char(400);                                             00120010
+   dcl called_rec char(400);                                            00130020
+   dcl called_num dim(105) pic 'S99' init(-9);                          00140036
+   dcl aocin file record input environment(recsize(400));               00150000
+   dcl end_file bit init('1'B);                                         00160000
+   dcl we_got_one bit init('0'B);                                       00170031
+   dcl 1 aocin_rec,                                                     00180000
+         5 in_rec char(400);                                            00190011
+   dcl card_total fixed bin(31) init(0);                                00200031
+                                                                        00210000
+   on endfile(aocin) end_file = '0'B;                                   00220000
+                                                                        00230000
+   open file(aocin);                                                    00240000
+   read file(aocin) into(aocin_rec);                                    00250014
+   call firstre;                                                        00260017
+   do while (end_file);                                                 00270000
+     in_rec = spaces_rec;                                               00280012
+     read file(aocin) into(aocin_rec);                                  00290000
+     if end_file then do;                                               00300000
+       call parser;                                                     00310000
+     end;                                                               00320000
+   end;                                                                 00330000
+   close file(aocin);                                                   00340000
+                                                                        00350031
+   loop: do call_num = 1 by 1 until(call_num = 100);                    00360045
+     put skip data(called_num(call_num));                               00370041
+     do card_num = 1 by 1 until(card_num = 100);                        00380045
+       put skip edit(' ')(a(1));                                        00390046
+       do row_num = 1 by 1 until(row_num = 5);                          00400045
+         put skip edit(card_num, row_num, ' ',                          00410044
+                 bingo_card(card_num).bingo_row(row_num).bingo_col(1),  00420044
+                 bingo_card(card_num).bingo_row(row_num).bingo_col(2),  00430044
+                 bingo_card(card_num).bingo_row(row_num).bingo_col(3),  00440044
+                 bingo_card(card_num).bingo_row(row_num).bingo_col(4),  00450044
+                 bingo_card(card_num).bingo_row(row_num).bingo_col(5))  00460044
+                 (f(3), f(2), a(1), a(4), a(4), a(4), a(4), a(4));      00470044
+         do col_num = 1 by 1 until(col_num = 5);                        00480045
+           if                                                           00490031
+           bingo_card(card_num).bingo_row(row_num).bingo_col(col_num) = 00500031
+           called_num(call_num) then                                    00510031
+           bingo_card(card_num).bingo_row(row_num).bingo_col(col_num) = 00520031
+           -1;                                                          00530031
+           if /* check for a bingo row */                               00540046
+            (bingo_card(card_num).bingo_row(row_num).bingo_col(1) = -1 &00550047
+            bingo_card(card_num).bingo_row(row_num).bingo_col(2) = -1 & 00560046
+            bingo_card(card_num).bingo_row(row_num).bingo_col(3) = -1 & 00570046
+            bingo_card(card_num).bingo_row(row_num).bingo_col(4) = -1 & 00580046
+            bingo_card(card_num).bingo_row(row_num).bingo_col(5) = -1) |00590048
+            /* or column 1 */                                           00600047
+            (bingo_card(card_num).bingo_row(1).bingo_col(1) = -1 &      00610049
+            bingo_card(card_num).bingo_row(2).bingo_col(1) = -1 &       00620049
+            bingo_card(card_num).bingo_row(3).bingo_col(1) = -1 &       00630049
+            bingo_card(card_num).bingo_row(4).bingo_col(1) = -1 &       00640049
+            bingo_card(card_num).bingo_row(5).bingo_col(1) = -1) |      00650049
+            /* or column 2 */                                           00660047
+            (bingo_card(card_num).bingo_row(1).bingo_col(2) = -1 &      00670049
+            bingo_card(card_num).bingo_row(2).bingo_col(2) = -1 &       00680049
+            bingo_card(card_num).bingo_row(3).bingo_col(2) = -1 &       00690049
+            bingo_card(card_num).bingo_row(4).bingo_col(2) = -1 &       00700049
+            bingo_card(card_num).bingo_row(5).bingo_col(2) = -1) |      00710049
+            /* or column 3 */                                           00720047
+            (bingo_card(card_num).bingo_row(1).bingo_col(3) = -1 &      00730049
+            bingo_card(card_num).bingo_row(2).bingo_col(3) = -1 &       00740049
+            bingo_card(card_num).bingo_row(3).bingo_col(3) = -1 &       00750049
+            bingo_card(card_num).bingo_row(4).bingo_col(3) = -1 &       00760049
+            bingo_card(card_num).bingo_row(5).bingo_col(3) = -1) |      00770049
+            /* or column 4 */                                           00780047
+            (bingo_card(card_num).bingo_row(1).bingo_col(4) = -1 &      00790049
+            bingo_card(card_num).bingo_row(2).bingo_col(4) = -1 &       00800049
+            bingo_card(card_num).bingo_row(3).bingo_col(4) = -1 &       00810049
+            bingo_card(card_num).bingo_row(4).bingo_col(4) = -1 &       00820049
+            bingo_card(card_num).bingo_row(5).bingo_col(4) = -1) |      00830049
+            /* or column 5 */                                           00840047
+            (bingo_card(card_num).bingo_row(1).bingo_col(5) = -1 &      00850049
+            bingo_card(card_num).bingo_row(2).bingo_col(5) = -1 &       00860049
+            bingo_card(card_num).bingo_row(3).bingo_col(5) = -1 &       00870049
+            bingo_card(card_num).bingo_row(4).bingo_col(5) = -1 &       00880049
+            bingo_card(card_num).bingo_row(5).bingo_col(5) = -1)        00890049
+             then /* We got one! */ do;                                 00900047
+              we_got_one = '1'B;                                        00910046
+              leave loop;                                               00920046
+           end;                                                         00930046
+         end /* col_num */;                                             00940041
+       end /* row_num */;                                               00950031
+     end /* card_num */;                                                00960031
+   end /* call_num */;                                                  00970031
+   if we_got_one then                                                   00980031
+    do row_num = 1 by 1 until(row_num = 5);                             00990045
+     do col_num = 1 by 1 until(col_num = 5);                            01000045
+       if bingo_card(card_num).bingo_row(row_num).bingo_col(col_num) > 001010042
+       then card_total = card_total +                                   01020031
+        bingo_card(card_num).bingo_row(row_num).bingo_col(col_num);     01030042
+     end;                                                               01040031
+   end;                                                                 01050031
+   put skip edit('Card #: ', card_num, 'Card total: ', card_total,      01060042
+                 ' Called: ',called_num(call_num), ' Total: ',          01070042
+                 card_total * called_num(call_num))                     01080039
+                (a(8), f(3), a(12), f(10),                              01090042
+                 a(9), f(10), a(8),                                     01100042
+                 f(10));                                                01110042
+                                                                        01120031
+ firstre: proc;                                                         01130017
+   dcl position fixed bin(15);                                          01140022
+   dcl temp_str char(3) init('   ');                                    01150037
+   call findlen;                                                        01160017
+   called_rec = substr(in_rec, 1, rec_len);                             01170020
+   do call_num = 1 by 1 until (call_num > 99);                          01180022
+     position = index(called_rec, ',');                                 01190022
+     temp_str = '+' || left(called_rec, position -1);                   01200037
+     if index(temp_str, ' ') = 0 then                                   01210037
+      called_num(call_num) = '+' ||left(called_rec, position -1);       01220037
+     else                                                               01230037
+     called_num(call_num) = '+0' || left(called_rec, position -1);      01240037
+                                                                        01250037
+     called_rec = substr(called_rec, position +1);                      01260022
+     put skip data(called_num(call_num));                               01270022
+   end;                                                                 01280022
+                                                                        01290037
+   /* NOTE:                                          */                 01300037
+   /* -----                                          */                 01310037
+   /* This will blow up if the last num is one digit */                 01320037
+                                                                        01330037
+   called_num(call_num) = '+' || left(called_rec, 2);                   01340037
+   put skip data(called_num(call_num));                                 01350022
+   put skip edit(' ')(A(1));                                            01360026
+ end firstre;                                                           01370017
+                                                                        01380017
+ parser: proc;                                                          01390000
+   call findlen;                                                        01400019
+   bingo_rec = substr(in_rec, 1, rec_len);                              01410006
+   if rec_len = 0 then do;                                              01420013
+     card_num = card_num +1;                                            01430013
+     row_num = 0;                                                       01440017
+     put skip edit(' ')(A(1));                                          01450022
+   end;                                                                 01460013
+   else do;                                                             01470017
+     row_num = row_num +1;                                              01480017
+     if index(substr(bingo_rec, 1, 2), ' ') = 0 then                    01490040
+     bingo_card(card_num).bingo_row(row_num).bingo_col(1) =             01500018
+     '+' || substr(bingo_rec, 1, 2);                                    01510036
+     else                                                               01520038
+      bingo_card(card_num).bingo_row(row_num).bingo_col(1) =            01530026
+      '+0' || substr(bingo_rec, 2, 1);                                  01540036
+                                                                        01550029
+     if index(substr(bingo_rec, 4, 2), ' ') = 0 then                    01560040
+       bingo_card(card_num).bingo_row(row_num).bingo_col(2) =           01570038
+     '+' || substr(bingo_rec, 4, 2);                                    01580036
+     else                                                               01590038
+      bingo_card(card_num).bingo_row(row_num).bingo_col(2) =            01600026
+      '0' || substr(bingo_rec, 5, 1);                                   01610026
+                                                                        01620029
+     if index(substr(bingo_rec, 7, 2), ' ') = 0 then                    01630040
+       bingo_card(card_num).bingo_row(row_num).bingo_col(3) =           01640038
+     '+' || substr(bingo_rec, 7, 2);                                    01650036
+     else                                                               01660038
+      bingo_card(card_num).bingo_row(row_num).bingo_col(3) =            01670026
+      '+0' || substr(bingo_rec, 8, 1);                                  01680036
+                                                                        01690029
+     if index(substr(bingo_rec, 10, 2), ' ') = 0 then                   01700040
+      bingo_card(card_num).bingo_row(row_num).bingo_col(4) =            01710038
+     '+' || substr(bingo_rec, 10, 2);                                   01720036
+     else                                                               01730038
+      bingo_card(card_num).bingo_row(row_num).bingo_col(4) =            01740026
+      '+0' || substr(bingo_rec, 11, 1);                                 01750036
+                                                                        01760029
+     if index(substr(bingo_rec, 13, 2), ' ') = 0 then                   01770040
+      bingo_card(card_num).bingo_row(row_num).bingo_col(5) =            01780038
+     '+' || substr(bingo_rec, 13, 2);                                   01790036
+     else                                                               01800038
+      bingo_card(card_num).bingo_row(row_num).bingo_col(5) =            01810026
+      '+0' || substr(bingo_rec, 14, 1);                                 01820036
+                                                                        01830029
+     put skip edit(card_num, row_num, ' ',                              01840021
+                 bingo_card(card_num).bingo_row(row_num).bingo_col(1),  01850019
+                 bingo_card(card_num).bingo_row(row_num).bingo_col(2),  01860018
+                 bingo_card(card_num).bingo_row(row_num).bingo_col(3),  01870018
+                 bingo_card(card_num).bingo_row(row_num).bingo_col(4),  01880018
+                 bingo_card(card_num).bingo_row(row_num).bingo_col(5))  01890018
+                 (f(3), f(2), a(1), a(4), a(4), a(4), a(4), a(4));      01900036
+   end;                                                                 01910021
+ end parser;                                                            01920000
+                                                                        01930000
+ findlen: proc;                                                         01940008
+   dcl curchar char(1);                                                 01950008
+   do rec_len = 400 to 1 by -1;                                         01960008
+     curchar = substr(in_rec, rec_len, 1);                              01970008
+     if index(curchar, '0') > 0 |                                       01980009
+        index(curchar, '1') > 0 |                                       01990009
+        index(curchar, '2') > 0 |                                       02000009
+        index(curchar, '3') > 0 |                                       02010009
+        index(curchar, '4') > 0 |                                       02020009
+        index(curchar, '5') > 0 |                                       02030009
+        index(curchar, '6') > 0 |                                       02040009
+        index(curchar, '7') > 0 |                                       02050009
+        index(curchar, '8') > 0 |                                       02060009
+        index(curchar, '9') > 0 then leave;                             02070008
+   end;                                                                 02080008
+ end findlen;                                                           02090008
+                                                                        02100008
+ end day#4£1;                                                           02110000
+
