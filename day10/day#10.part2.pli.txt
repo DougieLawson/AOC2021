@@ -1,0 +1,152 @@
+ day#A£2: proc options(main) reorder;                                   00010001
+                                                                        00020001
+   dcl aocin file record input environment(recsize(120));               00030001
+   dcl end_file bit init('1'B);                                         00040001
+   dcl count_braces fixed bin(15) init(0);                              00050001
+   dcl count_parens fixed bin(15) init(0);                              00060001
+   dcl count_angles fixed bin(15) init(0);                              00070001
+   dcl count_brackets fixed bin(15) init(0);                            00080001
+   dcl num_pairs  fixed bin(15);                                        00090001
+   dcl total float decimal(20) init(0);                                 00100017
+   dcl aoc_cnt fixed bin(15) init(0);                                   00110001
+   dcl syn_cnt fixed bin(15) init(0);                                   00120001
+   dcl stack_string dim(120) char(1);                                   00130001
+   dcl stack_cnt fixed bin(15) init(1);                                 00140001
+   dcl popped_OK bit;                                                   00150001
+   dcl 1 valid_stack dim(120),                                          00160001
+         5 valid_cnt fixed bin(15),                                     00170002
+         5 valid_string dim(120) char(1);                               00180001
+   dcl valid_idx fixed bin(15);                                         00190001
+   dcl 1 syn_rec dim(120),                                              00200001
+         5 syn_string dim(120) char(1);                                 00210001
+   dcl 1 aocin_rec,                                                     00220001
+         5 aoc_syn dim(120) char(1);                                    00230001
+                                                                        00240001
+   on endfile(aocin) end_file = '0'B;                                   00250001
+                                                                        00260001
+   open file(aocin);                                                    00270001
+   do while (end_file);                                                 00280001
+     read file(aocin) into(aocin_rec);                                  00290001
+     if end_file then do;                                               00300001
+       aoc_cnt = aoc_cnt +1;                                            00310001
+       call parser;                                                     00320001
+     end;                                                               00330001
+   end;                                                                 00340001
+   close file(aocin);                                                   00350001
+                                                                        00360001
+   do i = 1 by 1 until(i = valid_idx);                                  00370001
+     total = 0;                                                         00380001
+     put skip edit(' ')(a(1));                                          00390001
+     do j = valid_stack(i).valid_cnt by -1 until(j = 2);                00400008
+       put edit(valid_stack(i).valid_string(j))(a(1));                  00410005
+       select (valid_stack(i).valid_string(j));                         00420006
+        when ('(') do;                                                  00430006
+         total = total *5;                                              00440013
+         total = total +1;                                              00450006
+        end;                                                            00460006
+        when ('[') do;                                                  00470006
+         total = total *5;                                              00480013
+         total = total +2;                                              00490006
+        end;                                                            00500006
+        when ('{') do;                                                  00510006
+         total = total *5;                                              00520013
+         total = total +3;                                              00530006
+        end;                                                            00540006
+        when ('<') do;                                                  00550006
+         total = total *5;                                              00560013
+         total = total +4;                                              00570006
+        end;                                                            00580006
+        otherwise do; end;                                              00590007
+       end;                                                             00600006
+     end;                                                               00610001
+     put skip list(total);                                              00620016
+   end;                                                                 00630001
+                                                                        00640001
+ parser: proc;                                                          00650001
+   num_pairs = 0;                                                       00660001
+   stack_string = (120)' ';                                             00670001
+   stack_cnt = 1;                                                       00680001
+   count_braces = 0;                                                    00690001
+   count_parens = 0;                                                    00700001
+   count_angles = 0;                                                    00710001
+   count_brackets = 0;                                                  00720001
+   popped_OK = '1'B;                                                    00730001
+   syn_rec(aoc_cnt) = aocin_rec;                                        00740001
+   synloop: do syn_cnt = 1 by 1 until(syn_cnt = 120);                   00750001
+     select (syn_rec(aoc_cnt).syn_string(syn_cnt));                     00760001
+      when ('[') do;                                                    00770001
+        call push;                                                      00780001
+      end;                                                              00790001
+      when ('(') do;                                                    00800001
+        call push;                                                      00810001
+      end;                                                              00820001
+      when ('{') do;                                                    00830001
+        call push;                                                      00840001
+      end;                                                              00850001
+      when ('<') do;                                                    00860001
+        call push;                                                      00870001
+      end;                                                              00880001
+      when (']') do;                                                    00890001
+        call pop;                                                       00900001
+        if ¬popped_OK then do;                                          00910001
+          syn_cnt = 120;                                                00920001
+        end;                                                            00930001
+      end;                                                              00940001
+      when (')') do;                                                    00950001
+        call pop;                                                       00960001
+        if ¬popped_OK then do;                                          00970001
+          syn_cnt = 120;                                                00980001
+        end;                                                            00990001
+      end;                                                              01000001
+      when ('}') do;                                                    01010001
+        call pop;                                                       01020001
+        if ¬popped_OK then do;                                          01030001
+          syn_cnt = 120;                                                01040001
+        end;                                                            01050001
+      end;                                                              01060001
+      when ('>') do;                                                    01070001
+        call pop;                                                       01080001
+        if ¬popped_OK then do;                                          01090001
+          syn_cnt = 120;                                                01100001
+        end;                                                            01110001
+      end;                                                              01120001
+      when (' ') do; end;                                               01130001
+      otherwise put skip data (syn_rec(aoc_cnt).syn_string(syn_cnt));   01140001
+     end;                                                               01150001
+   end;                                                                 01160001
+   if popped_OK then do;                                                01170001
+     valid_idx = valid_idx +1;                                          01180001
+     do i = 1 by 1 until(i = 120);                                      01190004
+       valid_stack(valid_idx).valid_string(i) = ' ';                    01200004
+     end;                                                               01210004
+     valid_stack(valid_idx).valid_cnt = stack_cnt;                      01220001
+     do i = 1 by 1 until(i = stack_cnt);                                01230003
+       valid_stack(valid_idx).valid_string(i) = stack_string(i);        01240003
+     end;                                                               01250003
+   end;                                                                 01260003
+                                                                        01270001
+ end parser;                                                            01280001
+                                                                        01290001
+ push: proc;                                                            01300001
+   stack_cnt = stack_cnt +1;                                            01310001
+   stack_string(stack_cnt) = syn_rec(aoc_cnt).syn_string(syn_cnt);      01320001
+ end push;                                                              01330001
+                                                                        01340001
+ pop: proc;                                                             01350001
+   dcl compare_string char(1);                                          01360001
+   select (stack_string(stack_cnt));                                    01370001
+    when ('(') compare_string = ')';                                    01380001
+    when ('[') compare_string = ']';                                    01390001
+    when ('<') compare_string = '>';                                    01400001
+    when ('{') compare_string = '}';                                    01410001
+   end;                                                                 01420001
+   if compare_string ¬= syn_rec(aoc_cnt).syn_string(syn_cnt)            01430001
+   then do;                                                             01440001
+     popped_OK = '0'B;                                                  01450001
+   end;                                                                 01460001
+   stack_string(stack_cnt) = ' ';                                       01470001
+   stack_cnt = stack_cnt -1;                                            01480001
+                                                                        01490001
+ end pop;                                                               01500001
+                                                                        01510001
+ end day#A£2;                                                           01520001
